@@ -40,7 +40,38 @@ async function onCreateNode(api, pluginOptions) {
     return
   }
 
+  /** @type string */
   const content = await api.loadNodeContent(api.node)
+  /** @type RegExpMatchArray */
+  const fileImports = content.match(/(?:import {?(?:\* as)?\s*)(.*?)(?:\s}?\s*from\s*.*\.[0-9a-zA-Z]{1,4}['"])/gm)
+  /** @type string[] */
+  let namedImports = []
+  let importId = api.node.id.replace(/-/g,'')
+
+  let renamedImports = fileImports?.map((fileImport, index) => {
+    const importName = RegExp(/(?:import {?(?:\* as)?\s*)(.*?)(?:\s}?\s*from\s*.*\.[0-9a-zA-Z]{1,4}['"])/).exec(fileImport)
+    namedImports[index] = importName[1].trim()
+    return fileImport.replace(importName[1],  `${namedImports[index]}_${importId} `)
+  })
+
+  /** @type string */
+  let fixedContent = content
+  if (fileImports?.length !== renamedImports?.length) {
+    // Throw error
+    api.reporter.error("Error: the number of namespaced imports and found imports do not match in gatsby-plugin-mdx's onCreateNode")
+  } else {
+    try {
+      fileImports && fileImports.forEach((item, index) => {
+        fixedContent = fixedContent
+          // 1st replacement: replace given import, with uid postfixed imports
+          .replace(item, renamedImports[index])
+          // 2nd replacement: check for src={importName} and globally replace it regardless of surrounding space
+          .replace(RegExp(`src={ *?${namedImports[index]}`, 'gm'), `src={${namedImports[index]}_${importId}`)
+      })
+    } catch(err) {
+      api.reporter.error("Error when creating namespaced imports in gatsby-plugin-mdx")
+    }
+  }
 
   if (options.lessBabel) {
     await onCreateNodeLessBabel(content, api, options)
