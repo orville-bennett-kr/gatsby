@@ -46,9 +46,9 @@ async function onCreateNode(api, pluginOptions) {
   const fileImports = content.match(/(?:import {?(?:\* as)?\s*)(.*?)(?:\s}?\s*from\s*.*\.[0-9a-zA-Z]{1,4}['"])/gm)
   /** @type string[] */
   let namedImports = []
-  let importId = api.node.id.replace(/-/g,'')
+  const importId = api.node.id.replace(/-/g,'')
 
-  let renamedImports = fileImports?.map((fileImport, index) => {
+  const renamedImports = fileImports?.map((fileImport, index) => {
     const importName = RegExp(/(?:import {?(?:\* as)?\s*)(.*?)(?:\s}?\s*from\s*.*\.[0-9a-zA-Z]{1,4}['"])/).exec(fileImport)
     namedImports[index] = importName[1].trim()
     return fileImport.replace(importName[1],  `${namedImports[index]}_${importId} `)
