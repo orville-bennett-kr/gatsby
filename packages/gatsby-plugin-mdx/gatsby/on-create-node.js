@@ -68,11 +68,12 @@ async function onCreateNode(api, pluginOptions) {
   } else {
     try {
       fileImports.length > 0 && fileImports.forEach((item, index) => {
+        const namedImport = namedImports[index].trim()
         fixedContent = fixedContent
           // 1st replacement: replace given import, with uid postfixed imports
           .replace(item, renamedImports[index])
           // 2nd replacement: check for src={importName} and globally replace it regardless of surrounding space
-          .replace(RegExp(`src={ *?${namedImports[index]} *?}`, 'gm'), `src={${namedImports[index]}_${importId}}`)
+          .replace(RegExp(`src={ *?${namedImport} *?}`, 'gm'), `src={${namedImport}_${importId}}`)
       })
     } catch(err) {
       api.reporter.error("Error when creating namespaced imports in gatsby-plugin-mdx")
