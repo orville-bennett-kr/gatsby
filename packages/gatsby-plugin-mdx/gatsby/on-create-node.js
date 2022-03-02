@@ -44,15 +44,15 @@ async function onCreateNode(api, pluginOptions) {
   const content = await api.loadNodeContent(api.node)
   /** Captures the import name when used on a file with an extension up to 4 chars long. e.g 
    * `import pic from file.jpeg` or `import * as pic from file.jpeg` */
-  const importFinderRegexp = `import {?(?:\\* as\\s*)?(.*)(?:}?\\s*from\\s+['"].*\\.(?:avif|bmp|jpe?g|gif|png|svg|webp)['"])`
+  const importFinderRegexp = `import {?(?:\\*\\s+as\\s+)?(.*)(?:}?\\s*from\\s+['"].*\\.(?:avif|bmp|jpe?g|gif|png|svg|webp)['"])`
   /** An array of file imports, e.g. `import pic from file.jpeg`
    * @type RegExpMatchArray */
   let fileImports = []
   /** @type string[] */
   let namedImports = []
-  Array.from(content.matchAll(RegExp(importFinderRegexp, 'gm')), (m, idx) => {
-    fileImports[idx] = m[0]
-    namedImports[idx] = m[1]
+  Array.from(content.matchAll(RegExp(importFinderRegexp, 'gm')), (search, idx) => {
+    fileImports[idx] = search[0]
+    namedImports[idx] = search[1]
   })
   const importId = api.node.id.replace(/-/g,'')
 
